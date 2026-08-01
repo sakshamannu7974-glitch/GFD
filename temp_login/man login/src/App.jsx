@@ -5,12 +5,12 @@ import * as THREE from 'three'
 import './App.css'
 
 // Preload existing model & animation assets
-useGLTF.preload('/models/character.glb')
-useFBX.preload('/models/breathing-idle.fbx')
-useFBX.preload('/models/waving.fbx')
-useFBX.preload('/models/pull-heavy-object.fbx')
-useFBX.preload('/models/walking-backwards.fbx')
-useFBX.preload('/models/dwarf-idle.fbx')
+useGLTF.preload('./models/character.glb')
+useFBX.preload('./models/breathing-idle.fbx')
+useFBX.preload('./models/waving.fbx')
+useFBX.preload('./models/pull-heavy-object.fbx')
+useFBX.preload('./models/walking-backwards.fbx')
+useFBX.preload('./models/dwarf-idle.fbx')
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -184,12 +184,12 @@ function Character({ onFormPositionUpdate, onFormReleaseState, onSpeechBubbleUpd
   const startTimeRef = useRef(null)
   const warmupFramesRef = useRef(0)
 
-  const gltf = useGLTF('/models/character.glb')
-  const idleFbx = useFBX('/models/breathing-idle.fbx')
-  const waveFbx = useFBX('/models/waving.fbx')
-  const pullFbx = useFBX('/models/pull-heavy-object.fbx')
-  const walkBackFbx = useFBX('/models/walking-backwards.fbx')
-  const dwarfIdleFbx = useFBX('/models/dwarf-idle.fbx')
+  const gltf = useGLTF('./models/character.glb')
+  const idleFbx = useFBX('./models/breathing-idle.fbx')
+  const waveFbx = useFBX('./models/waving.fbx')
+  const pullFbx = useFBX('./models/pull-heavy-object.fbx')
+  const walkBackFbx = useFBX('./models/walking-backwards.fbx')
+  const dwarfIdleFbx = useFBX('./models/dwarf-idle.fbx')
 
   const clips = useMemo(() => {
     const walkClip = gltf.animations[0]?.clone()
