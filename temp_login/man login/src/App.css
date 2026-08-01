@@ -10,8 +10,7 @@
 
 html, body, #root {
   width: 100vw;
-  height: 100dvh;
-  min-height: 100dvh;
+  height: 100vh;
   margin: 0;
   padding: 0;
   background-color: #000000;
@@ -21,8 +20,7 @@ html, body, #root {
 .pure-black-stage {
   position: relative;
   width: 100vw;
-  height: 100dvh;
-  min-height: 100dvh;
+  height: 100vh;
   background: #000000;
   display: flex;
   align-items: center;

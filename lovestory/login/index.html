@@ -2,53 +2,25 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#000000" />
     <meta name="color-scheme" content="dark" />
-    <title>Login — Hamari Kahani</title>
-    <script type="module" crossorigin src="./assets/index-OBHMZslT.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/rolldown-runtime-QTnfLwEv.js">
-    <link rel="modulepreload" crossorigin href="./assets/react-three-Cmx8c543.js">
-    <link rel="stylesheet" crossorigin href="./assets/index-BUCU8IcZ.css">
-    <style>
-      .back-to-story {
-        position: fixed;
-        top: 16px;
-        left: 16px;
-        z-index: 9999;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 16px;
-        background: rgba(15, 12, 25, 0.85);
-        color: #f6f1ea;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 30px;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        font-size: 13px;
-        font-weight: 500;
-        text-decoration: none;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-        transition: all 0.3s ease;
-      }
-      .back-to-story:hover {
-        background: rgba(255, 255, 255, 0.2);
-        color: #ffffff;
-        transform: translateY(-2px);
-      }
-    </style>
+    <meta
+      name="description"
+      content="Sign in with a premium, animated 3D welcome experience."
+    />
+
+    <!-- Warm up the connection to the model host before it's requested. -->
+    <link rel="preload" as="fetch" href="/models/character.glb" type="model/gltf-binary" crossorigin />
+
+    <title>Sign In</title>
+    <script type="module" crossorigin src="/assets/index-BxJNoEQS.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-QTnfLwEv.js">
+    <link rel="modulepreload" crossorigin href="/assets/react-three-Cmx8c543.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-BUCU8IcZ.css">
   </head>
   <body>
-    <a href="../" class="back-to-story">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="19" y1="12" x2="5" y2="12"></line>
-        <polyline points="12 19 5 12 12 5"></polyline>
-      </svg>
-      Back to Story
-    </a>
     <div id="root"></div>
   </body>
 </html>

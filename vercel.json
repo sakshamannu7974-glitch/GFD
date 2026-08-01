@@ -8,10 +8,6 @@
       "destination": "/lovestory/api/$1"
     },
     {
-      "source": "/models/(.*)",
-      "destination": "/lovestory/models/$1"
-    },
-    {
       "source": "/(.*)",
       "destination": "/lovestory/$1"
     }
