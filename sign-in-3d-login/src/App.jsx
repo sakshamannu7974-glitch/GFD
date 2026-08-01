@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, useState, useEffect } from 'react'
+import React, { useRef, useMemo, useState, useEffect, Suspense } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { useGLTF, useFBX, useAnimations, OrbitControls, ContactShadows, RoundedBox, Html } from '@react-three/drei'
 import * as THREE from 'three'
@@ -15,6 +15,125 @@ useFBX.preload('/models/waving.fbx')
 useFBX.preload('/models/pull-heavy-object.fbx')
 useFBX.preload('/models/walking-backwards.fbx')
 useFBX.preload('/models/dwarf-idle.fbx')
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = { hasError: false }
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.warn("3D Login Error fallback activated:", error, errorInfo)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          width: '100vw',
+          height: '100dvh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#000000'
+        }}>
+          <StaticLoginForm />
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
+function StaticLoginForm() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+
+  return (
+    <div style={{
+      width: 'min(340px, 90vw)',
+      padding: '32px 28px',
+      background: 'rgba(16, 19, 30, 0.96)',
+      borderRadius: '20px',
+      border: '1px solid rgba(96, 165, 250, 0.3)',
+      boxShadow: '0 20px 50px rgba(0,0,0,0.8), 0 0 30px rgba(96, 165, 250, 0.2)',
+      color: '#FFFFFF',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    }}>
+      <div style={{ textAlign: 'center', marginBottom: '26px' }}>
+        <h2 style={{
+          margin: '0 0 6px 0',
+          fontSize: '26px',
+          fontWeight: 800,
+          background: 'linear-gradient(135deg, #FFFFFF 0%, #E2E8F0 35%, #60A5FA 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent'
+        }}>
+          Aaja Aaja
+        </h2>
+        <div style={{ height: '3px', width: '36px', background: 'linear-gradient(90deg, #3B82F6, #60A5FA)', borderRadius: '2px', margin: '0 auto' }} />
+      </div>
+
+      <div style={{ marginBottom: '18px' }}>
+        <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#CBD5E1', marginBottom: '8px' }}>
+          ✉️ Email Address
+        </label>
+        <input
+          type="email"
+          placeholder="developer@codexr.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          style={{ width: '100%', padding: '13px 16px', background: 'rgba(12, 14, 22, 0.8)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', color: '#FFFFFF', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
+        />
+      </div>
+
+      <div style={{ marginBottom: '28px' }}>
+        <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#CBD5E1', marginBottom: '8px' }}>
+          🔒 Password
+        </label>
+        <input
+          type="password"
+          placeholder="••••••••••••"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          style={{ width: '100%', padding: '13px 16px', background: 'rgba(12, 14, 22, 0.8)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', color: '#FFFFFF', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
+        />
+      </div>
+
+      <button
+        onClick={() => {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+          if (!email || !emailRegex.test(email.trim())) {
+            alert('Sahi email address dalo jaan! ✉️')
+          } else if (password !== 'Annu@0325' && password !== '0325') {
+            alert('Galat password hai jaan! Sahi password dalo 😉')
+          } else {
+            sessionStorage.setItem('authenticated', 'true')
+            window.location.replace('../')
+          }
+        }}
+        style={{
+          width: '100%',
+          padding: '15px',
+          background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
+          border: 'none',
+          borderRadius: '12px',
+          color: '#FFFFFF',
+          fontSize: '15px',
+          fontWeight: 700,
+          cursor: 'pointer',
+          boxShadow: '0 8px 22px rgba(37, 99, 235, 0.5)'
+        }}
+      >
+        UmmmHmmm raha nahi jata kya
+      </button>
+    </div>
+  )
+}
 
 function normalizeFBXClip(clip, name) {
   if (!clip) return null
@@ -472,7 +591,7 @@ function LoginForm({ positionX, isAttached, isReleased, htmlScale = 0.175, isSma
   )
 }
 
-export default function App() {
+function SceneStage() {
   const [formPositionX, setFormPositionX] = useState(4.28)
   const [isFormAttached, setIsFormAttached] = useState(false)
   const [isFormReleased, setIsFormReleased] = useState(false)
@@ -498,24 +617,24 @@ export default function App() {
   const bubbleYPos = isSmallMobile ? 2.15 : 2.35
 
   return (
-    <main className="pure-black-stage">
-      <Canvas
-        shadows
-        camera={{ position: cameraPos, fov: cameraFov }}
-        style={{ width: '100vw', height: '100dvh', background: '#000000' }}
-      >
-        <ambientLight intensity={0.75} />
-        <directionalLight
-          position={[5, 7, 6]}
-          intensity={1.4}
-          castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
-          shadow-bias={-0.0005}
-        />
-        <directionalLight position={[-4, 4, -4]} intensity={0.5} color="#89B3F8" />
-        <pointLight position={[0, 4, 3]} intensity={0.6} color="#FFFFFF" />
+    <Canvas
+      shadows
+      camera={{ position: cameraPos, fov: cameraFov }}
+      style={{ width: '100vw', height: '100dvh', background: '#000000' }}
+    >
+      <ambientLight intensity={0.75} />
+      <directionalLight
+        position={[5, 7, 6]}
+        intensity={1.4}
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-bias={-0.0005}
+      />
+      <directionalLight position={[-4, 4, -4]} intensity={0.5} color="#89B3F8" />
+      <pointLight position={[0, 4, 3]} intensity={0.6} color="#FFFFFF" />
 
+      <Suspense fallback={null}>
         <Character
           onFormPositionUpdate={(x, attached) => {
             setFormPositionX(x)
@@ -561,15 +680,25 @@ export default function App() {
           <planeGeometry args={[40, 10]} />
           <shadowMaterial opacity={0.3} />
         </mesh>
+      </Suspense>
 
-        <OrbitControls
-          enableZoom={false}
-          enablePan={false}
-          maxPolarAngle={Math.PI / 2 + 0.04}
-          minPolarAngle={Math.PI / 2 - 0.25}
-          target={[0, 1.1, 0]}
-        />
-      </Canvas>
+      <OrbitControls
+        enableZoom={false}
+        enablePan={false}
+        maxPolarAngle={Math.PI / 2 + 0.04}
+        minPolarAngle={Math.PI / 2 - 0.25}
+        target={[0, 1.1, 0]}
+      />
+    </Canvas>
+  )
+}
+
+export default function App() {
+  return (
+    <main className="pure-black-stage">
+      <ErrorBoundary>
+        <SceneStage />
+      </ErrorBoundary>
     </main>
   )
 }
