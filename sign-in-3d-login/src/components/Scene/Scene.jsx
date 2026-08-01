@@ -26,13 +26,18 @@ const INITIAL_STORY_STATE = {
  */
 export function Scene({ onSubmit }) {
   const prefersReducedMotion = useReducedMotion()
-  const { isMobile } = useResponsiveViewport()
+  const { isMobile, isSmallMobile } = useResponsiveViewport()
   const [story, setStory] = useState(INITIAL_STORY_STATE)
   const [skipRequested, setSkipRequested] = useState(false)
 
   const skipIntro = prefersReducedMotion || skipRequested
-  const camera = isMobile ? sceneConfig.cameraMobile : sceneConfig.camera
-  const htmlScale = isMobile ? 0.21 : 0.175
+  const camera = isSmallMobile
+    ? sceneConfig.cameraSmallMobile
+    : isMobile
+      ? sceneConfig.cameraMobile
+      : sceneConfig.camera
+
+  const htmlScale = isSmallMobile ? 0.135 : isMobile ? 0.16 : 0.175
 
   return (
     <div className={styles.stage}>
@@ -46,8 +51,7 @@ export function Scene({ onSubmit }) {
         </button>
       )}
 
-      {/* Announces the character's dialogue and form availability to
-          screen reader / switch-access users who aren't watching the canvas. */}
+      {/* Announces the character's dialogue and form availability */}
       <div className={styles.liveRegion} role="status" aria-live="polite">
         {story.isFormReleased ? 'Sign-in form is ready.' : story.bubbleText}
       </div>

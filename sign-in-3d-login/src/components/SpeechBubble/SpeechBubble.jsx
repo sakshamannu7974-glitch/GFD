@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Html } from '@react-three/drei'
+import { useResponsiveViewport } from '../../hooks/useResponsiveViewport'
 import styles from './SpeechBubble.module.css'
 
 /**
@@ -10,14 +11,18 @@ import styles from './SpeechBubble.module.css'
  */
 export function SpeechBubble({ visible, positionX, text }) {
   const groupRef = useRef()
+  const { isMobile, isSmallMobile } = useResponsiveViewport()
 
   useFrame(() => {
     if (groupRef.current) groupRef.current.position.x = positionX
   })
 
+  const bubbleY = isSmallMobile ? 2.15 : isMobile ? 2.25 : 2.35
+  const bubbleScale = isSmallMobile ? 0.135 : isMobile ? 0.16 : 0.18
+
   return (
-    <group ref={groupRef} position={[positionX, 2.35, 0]}>
-      <Html transform position={[0, 0, 0]} scale={0.18} className={styles.wrapper}>
+    <group ref={groupRef} position={[positionX, bubbleY, 0]}>
+      <Html transform position={[0, 0, 0]} scale={bubbleScale} className={styles.wrapper}>
         <div
           aria-hidden="true"
           className={styles.bubble}

@@ -9,6 +9,50 @@
   .timeline-spine-fill { left: 0; }
 }
 
+@media (max-width: 768px) {
+  /* Floating trigger buttons positioning for mobile screens */
+  .msg-side-btn {
+    top: auto !important;
+    bottom: 20px !important;
+    right: 14px !important;
+    z-index: 1000 !important;
+    padding: 10px 16px !important;
+    font-size: 12px !important;
+    background: rgba(15, 12, 25, 0.94) !important;
+    border: 1px solid rgba(224, 148, 122, 0.5) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8), 0 0 12px rgba(224, 148, 122, 0.3) !important;
+  }
+
+  .love-note-side-btn {
+    top: auto !important;
+    bottom: 20px !important;
+    left: 14px !important;
+    right: auto !important;
+    z-index: 1000 !important;
+    padding: 10px 16px !important;
+    font-size: 12px !important;
+    background: rgba(15, 12, 25, 0.94) !important;
+    border: 1px solid rgba(224, 148, 122, 0.5) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8), 0 0 12px rgba(224, 148, 122, 0.3) !important;
+  }
+
+  /* Modals responsiveness */
+  .msg-card {
+    width: 92vw !important;
+    max-height: 88vh !important;
+    overflow-y: auto !important;
+    padding: 24px 18px !important;
+    border-radius: 20px !important;
+  }
+
+  .love-note-content {
+    width: 94vw !important;
+    max-height: 88vh !important;
+    overflow-y: auto !important;
+    padding: 24px 18px !important;
+  }
+}
+
 @media (max-width: 520px) {
   .hero { padding-top: 100px; }
   .chapter-title { font-size: clamp(1.8rem, 8vw, 2.6rem); }

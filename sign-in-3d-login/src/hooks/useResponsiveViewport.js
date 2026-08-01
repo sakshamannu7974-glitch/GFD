@@ -1,14 +1,20 @@
 import { useEffect, useState } from 'react'
 
 const MOBILE_BREAKPOINT = 768
+const SMALL_MOBILE_BREAKPOINT = 480
 
 function getViewport() {
   if (typeof window === 'undefined') {
-    return { width: 1280, height: 800, isMobile: false }
+    return { width: 1280, height: 800, isMobile: false, isSmallMobile: false }
   }
   const width = window.innerWidth
   const height = window.innerHeight
-  return { width, height, isMobile: width < MOBILE_BREAKPOINT }
+  return {
+    width,
+    height,
+    isMobile: width < MOBILE_BREAKPOINT,
+    isSmallMobile: width < SMALL_MOBILE_BREAKPOINT,
+  }
 }
 
 /**

@@ -35,8 +35,12 @@ export const sceneConfig = {
     fov: 38,
   },
   cameraMobile: {
-    position: [0, 1.5, 8.4],
-    fov: 42,
+    position: [0, 1.4, 8.4],
+    fov: 44,
+  },
+  cameraSmallMobile: {
+    position: [0, 1.35, 10.2],
+    fov: 48,
   },
   lights: {
     ambient: { intensity: 0.75 },
@@ -69,8 +73,6 @@ export const sceneConfig = {
 
 /**
  * Storyline timeline (seconds, relative to when the character becomes visible).
- * Kept as named constants so the animation logic in useCharacterStoryline
- * reads like a script rather than a wall of magic numbers.
  */
 export const timeline = {
   formRestX: 4.28, // form parked off-screen right, waiting to be delivered
@@ -81,14 +83,14 @@ export const timeline = {
     start: 1.8,
     end: 4.4,
     x: -1.2,
-    message: 'Wait a second! Let me grab the login form for you! 👋',
+    message: 'Ruko thoda! Tumhare liye surprise form la raha hu! 👋',
   },
   crossOver: { start: 4.4, end: 6.4, fromX: -1.2, toX: 2.73 },
   pullForm: { start: 6.4, end: 12.0, fromCharX: 2.73, toCharX: -1.5 },
   delivered: {
     start: 12.0,
     charX: -1.5,
-    message: 'Here is your form! ✨',
+    message: 'Aa gai surprise dekhne kya baat hai ✨',
   },
 }
 
