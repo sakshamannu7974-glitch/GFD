@@ -30,7 +30,7 @@
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/responsive.css" />
 
-  <!-- Preload the hero collage -- the very first thing a visitor sees. -->
+  <!-- Preload the hero collage -->
   <link rel="preload" as="image" href="assets/images/hero/collage-01.png" fetchpriority="high" />
   <!-- Gatekeeper: Redirect to Login if not authenticated -->
   <script>
@@ -45,18 +45,26 @@
   <div id="ambient-glow"></div>
   <div id="particle-container"></div>
   <div id="timeline-progress"></div>
-  <button onclick="sessionStorage.removeItem('authenticated'); window.location.reload();" class="login-btn-nav" title="Logout">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-    </svg>
-    <span>Lock / Logout</span>
-  </button>
+
+  <!-- Fixed Top Header Actions -->
+  <div class="top-nav-bar">
+    <button id="top-msg-trigger-btn" class="nav-msg-btn" title="Send a Message">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+      <span>💌 Sandesh Bhejein</span>
+    </button>
+    <button onclick="sessionStorage.removeItem('authenticated'); window.location.reload();" class="login-btn-nav" title="Logout">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+      <span>Lock / Logout</span>
+    </button>
+  </div>
 
   <main id="story-root" aria-live="polite"></main>
 
-  <!-- Third-party libraries (CDN). If offline, chapter-observer.js and
-       smooth-scroll.js both detect their absence and fall back gracefully. -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lenis/1.1.14/lenis.min.js"></script>

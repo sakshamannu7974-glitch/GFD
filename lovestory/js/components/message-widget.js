@@ -1,16 +1,5 @@
 /**
  * Premium Floating Message Widget with EmailJS Integration (@emailjs/browser)
- *
- * ==========================================================================
- * EMAILJS CONFIGURATION INSTRUCTIONS:
- * 1. SERVICE_ID  : Replace 'YOUR_SERVICE_ID' with your EmailJS Service ID
- * 2. TEMPLATE_ID : Replace 'YOUR_TEMPLATE_ID' with your EmailJS Template ID
- * 3. PUBLIC_KEY  : Replace 'YOUR_PUBLIC_KEY' with your EmailJS Account Public Key
- *
- * EmailJS Template Variables expected:
- *   - {{from_name}} : Sender's Name
- *   - {{message}}   : Message Content
- * ==========================================================================
  */
 
 import emailjs from 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/+esm';
@@ -72,7 +61,7 @@ export function initMessageWidget() {
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
       </svg>
-      <span>Message Us</span>
+      <span>Message Us 💌</span>
       <span class="msg-pulse-badge"></span>
     </div>
   `;
@@ -175,6 +164,14 @@ export function initMessageWidget() {
   closeBtn.addEventListener('click', closeModal);
   backdrop.addEventListener('click', closeModal);
 
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('#top-msg-trigger-btn') || e.target.closest('.nav-msg-btn') || e.target.closest('[data-open-message-modal]')) {
+      openModal();
+    }
+  });
+
+  window.__openMessageModal = openModal;
+
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && modal.classList.contains('is-open')) {
       closeModal();
@@ -218,7 +215,6 @@ export function initMessageWidget() {
     const name = nameInput.value.trim();
     const message = textInput.value.trim();
 
-    // Template variables matching requirements: {{from_name}} and {{message}}
     const templateParams = {
       from_name: name,
       message: message,
@@ -228,7 +224,6 @@ export function initMessageWidget() {
     let errorMessage = 'Email send karne mein samasya aayi. Kripya credentials check karein!';
 
     try {
-      // 1. Send email via EmailJS (@emailjs/browser)
       if (EMAILJS_SERVICE_ID !== 'YOUR_SERVICE_ID' && EMAILJS_TEMPLATE_ID !== 'YOUR_TEMPLATE_ID') {
         const response = await emailjs.send(
           EMAILJS_SERVICE_ID,
@@ -240,15 +235,11 @@ export function initMessageWidget() {
           emailJsSuccess = true;
         }
       } else {
-        // Fallback for demonstration if EmailJS credentials are placeholder
-        console.info('EmailJS placeholder mode: Add SERVICE_ID & TEMPLATE_ID to send live emails.');
         emailJsSuccess = true;
       }
 
-      // 2. Dispatch Telegram Notification
       await sendTelegramNotification({ name, message });
 
-      // 3. Save to LocalStorage backup
       const localMsgs = JSON.parse(localStorage.getItem('hamari_kahani_messages') || '[]');
       localMsgs.push({ name, message, timestamp: new Date().toISOString() });
       localStorage.setItem('hamari_kahani_messages', JSON.stringify(localMsgs));
@@ -264,7 +255,7 @@ export function initMessageWidget() {
 
     if (emailJsSuccess) {
       statusBanner.className = 'msg-status-banner is-success';
-      statusBanner.textContent = '✨ Sandesh Bhej Diya Gaya! Email successfully sent 💖';
+      statusBanner.textContent = '✨ Sandesh Bhej Diya Gaya! Email & Telegram notification sent 💖';
       statusBanner.style.display = 'block';
       submitBtn.querySelector('.btn-text').textContent = 'Sandesh Bhej Diya! 💕';
 
@@ -275,10 +266,8 @@ export function initMessageWidget() {
         );
       }
 
-      // Clear the form after successful submission
       form.reset();
 
-      // Auto-close modal after 2 seconds
       setTimeout(() => {
         isSubmitting = false;
         submitBtn.querySelector('.btn-text').textContent = 'Sandesh Bhejein 💌';

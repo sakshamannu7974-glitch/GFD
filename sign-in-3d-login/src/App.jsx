@@ -1,44 +1,575 @@
-import { lazy, Suspense, useCallback } from 'react'
-import { LoadingScreen } from './components/LoadingScreen/LoadingScreen'
-import { StaticLoginPage } from './components/Fallback/StaticLoginPage'
-import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary'
-import { useWebGLSupport } from './hooks/useWebGLSupport'
+import React, { useRef, useMemo, useState, useEffect } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { useGLTF, useFBX, useAnimations, OrbitControls, ContactShadows, RoundedBox, Html } from '@react-three/drei'
+import * as THREE from 'three'
 import './styles/global.css'
 
-// The 3D scene pulls in three.js + @react-three/fiber + drei — by far the
-// heaviest part of the bundle. Loading it as its own chunk means the very
-// first paint (this shell + the loading screen) ships in a tiny bundle,
-// and the 3D chunk streams in on top of it.
-const Scene = lazy(() => import('./components/Scene/Scene').then((m) => ({ default: m.Scene })))
-
-/**
- * Demo sign-in handler. Swap this out for a real API call — the contract
- * (`credentials, finish`) is the only thing `LoginForm` depends on.
+/* 
+ * ── SYNCHRONIZED 3D CHARACTER & LOGIN FORM STORYLINE SYSTEM ──
  */
-function handleDemoSubmit(_credentials, finish) {
-  window.setTimeout(() => finish(true), 900)
+
+// Preload existing model & animation assets
+useGLTF.preload('/models/character.glb')
+useFBX.preload('/models/breathing-idle.fbx')
+useFBX.preload('/models/waving.fbx')
+useFBX.preload('/models/pull-heavy-object.fbx')
+useFBX.preload('/models/walking-backwards.fbx')
+useFBX.preload('/models/dwarf-idle.fbx')
+
+function normalizeFBXClip(clip, name) {
+  if (!clip) return null
+  const cloned = clip.clone()
+  cloned.name = name
+
+  const qOffset = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 2)
+
+  cloned.tracks.forEach((track) => {
+    if (track.name.includes('Hips.quaternion') || track.name.includes('Hips.rotation')) {
+      const values = track.values
+      for (let i = 0; i < values.length; i += 4) {
+        const q = new THREE.Quaternion().fromArray(values, i)
+        q.premultiply(qOffset)
+        q.toArray(values, i)
+      }
+    } else if (track.name.includes('Hips.position')) {
+      const values = track.values
+      for (let i = 0; i < values.length; i += 3) {
+        const x = values[i + 0]
+        const y = values[i + 1]
+        const z = values[i + 2]
+        values[i + 0] = x
+        values[i + 1] = z
+        values[i + 2] = -y
+      }
+    }
+  })
+
+  return cloned
+}
+
+function Character({ onFormPositionUpdate, onFormReleaseState, onSpeechBubbleUpdate }) {
+  const groupRef = useRef()
+  const startTimeRef = useRef(null)
+  const warmupFramesRef = useRef(0)
+
+  const gltf = useGLTF('/models/character.glb')
+  const idleFbx = useFBX('/models/breathing-idle.fbx')
+  const waveFbx = useFBX('/models/waving.fbx')
+  const pullFbx = useFBX('/models/pull-heavy-object.fbx')
+  const walkBackFbx = useFBX('/models/walking-backwards.fbx')
+  const dwarfIdleFbx = useFBX('/models/dwarf-idle.fbx')
+
+  const clips = useMemo(() => {
+    const walkClip = gltf.animations[0]?.clone()
+    if (walkClip) walkClip.name = 'Walk'
+
+    const idleClip = normalizeFBXClip(idleFbx.animations[0], 'Idle')
+    const waveClip = normalizeFBXClip(waveFbx.animations[0], 'Wave')
+    const pullClip = normalizeFBXClip(pullFbx.animations[0], 'Pull')
+    const walkBackClip = normalizeFBXClip(walkBackFbx.animations[0], 'WalkBackwards')
+    const dwarfIdleClip = normalizeFBXClip(dwarfIdleFbx.animations[0], 'DwarfIdle')
+
+    return [walkClip, idleClip, waveClip, pullClip, walkBackClip, dwarfIdleClip].filter(Boolean)
+  }, [gltf, idleFbx, waveFbx, pullFbx, walkBackFbx, dwarfIdleFbx])
+
+  const { actions, mixer } = useAnimations(clips, groupRef)
+  const activeActionRef = useRef('')
+
+  const playAction = (name, fadeDuration = 0.35, timeScale = 1.0) => {
+    if (!actions[name]) return
+
+    const prevName = activeActionRef.current
+    const nextAction = actions[name]
+    const prevAction = prevName ? actions[prevName] : null
+
+    if (activeActionRef.current === name) {
+      nextAction.setEffectiveTimeScale(timeScale)
+      return
+    }
+
+    nextAction.reset()
+    nextAction.setEffectiveTimeScale(timeScale)
+    nextAction.setEffectiveWeight(1.0)
+
+    if (!prevAction || prevName === '') {
+      nextAction.play()
+    } else {
+      nextAction.fadeIn(fadeDuration)
+      nextAction.play()
+      if (prevAction) prevAction.fadeOut(fadeDuration)
+    }
+
+    activeActionRef.current = name
+  }
+
+  useEffect(() => {
+    if (gltf.scene) {
+      gltf.scene.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = true
+          child.receiveShadow = true
+        }
+      })
+    }
+  }, [gltf.scene])
+
+  useFrame((state, delta) => {
+    if (!groupRef.current) return
+
+    const initialFormX = 4.28
+
+    if (warmupFramesRef.current < 4) {
+      groupRef.current.visible = false
+      groupRef.current.position.x = -4.2
+      groupRef.current.rotation.y = Math.PI / 2
+
+      if (actions['Walk']) {
+        actions['Walk'].reset()
+        actions['Walk'].setEffectiveTimeScale(1.25)
+        actions['Walk'].setEffectiveWeight(1.0)
+        actions['Walk'].play()
+        activeActionRef.current = 'Walk'
+        if (mixer) mixer.update(0.03)
+      }
+
+      warmupFramesRef.current += 1
+      startTimeRef.current = null
+      onFormPositionUpdate(initialFormX, false)
+      onFormReleaseState(false)
+      onSpeechBubbleUpdate(false, -4.2, '')
+      return
+    }
+
+    if (!groupRef.current.visible) {
+      groupRef.current.visible = true
+    }
+
+    const safeDelta = Math.min(delta, 0.05)
+
+    if (startTimeRef.current === null) {
+      startTimeRef.current = state.clock.getElapsedTime()
+    }
+
+    const time = state.clock.getElapsedTime() - startTimeRef.current
+
+    if (time < 1.8) {
+      /* Phase 1: Enter walking forward */
+      playAction('Walk', 0.2, 1.25)
+      
+      const progress = time / 1.8
+      groupRef.current.position.x = THREE.MathUtils.lerp(-4.2, -1.2, progress)
+      groupRef.current.position.z = 0
+      groupRef.current.rotation.y = Math.PI / 2
+      
+      onFormPositionUpdate(initialFormX, false)
+      onFormReleaseState(false)
+      onSpeechBubbleUpdate(false, groupRef.current.position.x, '')
+
+    } else if (time < 4.4) {
+      /* Phase 2: STOP walking, wave */
+      playAction('Wave', 0.3, 1.0)
+      
+      groupRef.current.position.x = -1.2
+      groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, 0.05, safeDelta * 6)
+      
+      onFormPositionUpdate(initialFormX, false)
+      onFormReleaseState(false)
+      onSpeechBubbleUpdate(true, -1.2, 'Ruko thoda! Tumhare liye surprise form la raha hu! 👋')
+
+    } else if (time < 6.4) {
+      /* Phase 3: Turn right toward form */
+      playAction('Walk', 0.2, 1.3)
+      
+      const progress = (time - 4.4) / (6.4 - 4.4)
+      groupRef.current.position.x = THREE.MathUtils.lerp(-1.2, 2.73, progress)
+      groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, Math.PI / 2, safeDelta * 8)
+      
+      onFormPositionUpdate(initialFormX, false)
+      onFormReleaseState(false)
+      onSpeechBubbleUpdate(false, groupRef.current.position.x, '')
+
+    } else if (time < 12.0) {
+      /* Phase 4: Pull form */
+      playAction('Pull', 0.25, 1.0)
+
+      const totalPullProgress = (time - 6.4) / (12.0 - 6.4)
+
+      const charX = THREE.MathUtils.lerp(2.73, -1.5, totalPullProgress)
+      groupRef.current.position.x = charX
+      groupRef.current.rotation.y = Math.PI / 2
+
+      const formX = THREE.MathUtils.lerp(initialFormX, 0.0, totalPullProgress)
+      onFormPositionUpdate(formX, true)
+      onFormReleaseState(false)
+      onSpeechBubbleUpdate(false, charX, '')
+
+    } else {
+      /* Phase 5: Delivered form */
+      playAction('DwarfIdle', 0.4, 1.0)
+      
+      groupRef.current.position.x = -1.5
+      groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, 0.3, safeDelta * 4)
+
+      onFormPositionUpdate(0.0, false)
+      onFormReleaseState(true)
+      onSpeechBubbleUpdate(true, -1.5, 'Aa gai surprise dekhne kya baat hai ✨')
+    }
+  })
+
+  return (
+    <group ref={groupRef} position={[-4.2, 0, 0]} scale={[1.0, 1.0, 1.0]} visible={false}>
+      <primitive object={gltf.scene} />
+    </group>
+  )
+}
+
+function SpeechBubble({ visible, positionX, text, scale = 0.18, yPos = 2.35 }) {
+  const bubbleRef = useRef()
+
+  useFrame(() => {
+    if (!bubbleRef.current) return
+    bubbleRef.current.position.x = positionX
+  })
+
+  return (
+    <group ref={bubbleRef} position={[positionX, yPos, 0]}>
+      <Html
+        transform
+        position={[0, 0, 0]}
+        scale={scale}
+        className="speech-bubble-html"
+      >
+        <div style={{
+          padding: '12px 20px',
+          background: 'rgba(15, 18, 28, 0.96)',
+          borderRadius: '24px',
+          border: '1px solid rgba(138, 180, 248, 0.4)',
+          boxShadow: '0 16px 36px rgba(0,0,0,0.8), 0 0 20px rgba(138, 180, 248, 0.18)',
+          color: '#FFFFFF',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          whiteSpace: 'nowrap',
+          pointerEvents: 'none',
+          transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+          opacity: visible ? 1 : 0,
+          transform: visible ? 'scale(1) translateY(0)' : 'scale(0.8) translateY(10px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <span style={{ fontSize: '14.5px', fontWeight: 600, letterSpacing: '-0.2px', color: '#F8FAFC' }}>
+            {text || 'Ruko thoda! Tumhare liye surprise form la raha hu! 👋'}
+          </span>
+          
+          <div style={{
+            position: 'absolute',
+            bottom: '-7px',
+            left: '50%',
+            transform: 'translateX(-50%) rotate(45deg)',
+            width: '13px',
+            height: '13px',
+            background: 'rgba(15, 18, 28, 0.96)',
+            borderRight: '1px solid rgba(138, 180, 248, 0.4)',
+            borderBottom: '1px solid rgba(138, 180, 248, 0.4)'
+          }} />
+        </div>
+      </Html>
+    </group>
+  )
+}
+
+function LoginForm({ positionX, isAttached, isReleased, htmlScale = 0.175, isSmallMobile = false }) {
+  const formGroupRef = useRef()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [activeField, setActiveField] = useState(null)
+
+  useFrame((state) => {
+    if (!formGroupRef.current) return
+    formGroupRef.current.position.x = positionX
+
+    if (isReleased) {
+      const hover = Math.sin(state.clock.getElapsedTime() * 2.2) * 0.025
+      formGroupRef.current.position.y = 1.15 + hover
+    } else {
+      formGroupRef.current.position.y = 1.15
+    }
+  })
+
+  return (
+    <group ref={formGroupRef} position={[positionX, 1.15, 0]}>
+      <RoundedBox
+        args={[2.0, 2.15, 0.1]}
+        radius={0.1}
+        smoothness={4}
+        castShadow
+        receiveShadow
+        material={new THREE.MeshStandardMaterial({
+          color: isReleased ? '#10131E' : '#0B0D14',
+          roughness: 0.18,
+          metalness: 0.38
+        })}
+      />
+
+      <RoundedBox
+        args={[2.06, 2.21, 0.06]}
+        radius={0.11}
+        smoothness={4}
+        position={[0, 0, -0.04]}
+        material={new THREE.MeshBasicMaterial({
+          color: isAttached ? '#60A5FA' : (isReleased ? '#3B82F6' : '#222736')
+        })}
+      />
+
+      <Html
+        transform
+        position={[0, 0, 0.052]}
+        scale={htmlScale}
+        className="login-form-html"
+      >
+        <div style={{
+          width: isSmallMobile ? '295px' : '340px',
+          padding: isSmallMobile ? '24px 20px' : '32px 28px',
+          background: 'rgba(16, 19, 30, 0.96)',
+          borderRadius: '20px',
+          border: 'none',
+          boxShadow: 'none',
+          color: '#FFFFFF',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          pointerEvents: isReleased ? 'auto' : 'none',
+          transition: 'all 0.35s ease',
+          opacity: isReleased ? 1 : 0.88
+        }}>
+          <div style={{ textAlign: 'center', marginBottom: isSmallMobile ? '20px' : '26px' }}>
+            <h2 style={{
+              margin: '0 0 6px 0',
+              fontSize: isSmallMobile ? '22px' : '26px',
+              fontWeight: 800,
+              letterSpacing: '-0.6px',
+              background: 'linear-gradient(135deg, #FFFFFF 0%, #E2E8F0 35%, #60A5FA 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>
+              Aaja Aaja
+            </h2>
+            <div style={{
+              height: '3px',
+              width: '36px',
+              background: 'linear-gradient(90deg, #3B82F6, #60A5FA)',
+              borderRadius: '2px',
+              margin: '0 auto'
+            }} />
+          </div>
+
+          <div style={{ marginBottom: isSmallMobile ? '14px' : '18px' }}>
+            <label style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '13px',
+              fontWeight: 600,
+              color: activeField === 'email' ? '#60A5FA' : '#CBD5E1',
+              marginBottom: '8px',
+              transition: 'color 0.2s ease'
+            }}>
+              <span>✉️</span> Email Address
+            </label>
+            <input
+              type="email"
+              placeholder="developer@codexr.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onFocus={() => setActiveField('email')}
+              onBlur={() => setActiveField(null)}
+              disabled={!isReleased}
+              style={{
+                width: '100%',
+                padding: isSmallMobile ? '11px 14px' : '13px 16px',
+                background: activeField === 'email' ? 'rgba(15, 18, 28, 0.95)' : 'rgba(12, 14, 22, 0.8)',
+                border: activeField === 'email' ? '1px solid #60A5FA' : '1px solid rgba(255, 255, 255, 0.14)',
+                borderRadius: '12px',
+                color: '#FFFFFF',
+                fontSize: '14px',
+                outline: 'none',
+                boxSizing: 'border-box',
+                cursor: isReleased ? 'text' : 'not-allowed',
+                boxShadow: activeField === 'email' ? '0 0 0 3px rgba(96, 165, 250, 0.2), inset 0 2px 4px rgba(0,0,0,0.5)' : 'inset 0 2px 4px rgba(0,0,0,0.4)',
+                transition: 'all 0.2s ease'
+              }}
+            />
+          </div>
+
+          <div style={{ marginBottom: isSmallMobile ? '20px' : '28px' }}>
+            <label style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '13px',
+              fontWeight: 600,
+              color: activeField === 'password' ? '#60A5FA' : '#CBD5E1',
+              marginBottom: '8px',
+              transition: 'color 0.2s ease'
+            }}>
+              <span>🔒</span> Password
+            </label>
+            <input
+              type="password"
+              placeholder="••••••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onFocus={() => setActiveField('password')}
+              onBlur={() => setActiveField(null)}
+              disabled={!isReleased}
+              style={{
+                width: '100%',
+                padding: isSmallMobile ? '11px 14px' : '13px 16px',
+                background: activeField === 'password' ? 'rgba(15, 18, 28, 0.95)' : 'rgba(12, 14, 22, 0.8)',
+                border: activeField === 'password' ? '1px solid #60A5FA' : '1px solid rgba(255, 255, 255, 0.14)',
+                borderRadius: '12px',
+                color: '#FFFFFF',
+                fontSize: '14px',
+                outline: 'none',
+                boxSizing: 'border-box',
+                cursor: isReleased ? 'text' : 'not-allowed',
+                boxShadow: activeField === 'password' ? '0 0 0 3px rgba(96, 165, 250, 0.2), inset 0 2px 4px rgba(0,0,0,0.5)' : 'inset 0 2px 4px rgba(0,0,0,0.4)',
+                transition: 'all 0.2s ease'
+              }}
+            />
+          </div>
+
+          <button
+            disabled={!isReleased}
+            onClick={() => {
+              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+              if (!email || !emailRegex.test(email.trim())) {
+                alert('Sahi email address dalo jaan! ✉️')
+              } else if (password !== 'Annu@0325' && password !== '0325') {
+                alert('Galat password hai jaan! Sahi password dalo 😉')
+              } else {
+                sessionStorage.setItem('authenticated', 'true')
+                window.location.replace('../')
+              }
+            }}
+            style={{
+              width: '100%',
+              padding: isSmallMobile ? '13px' : '15px',
+              background: isReleased ? 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)' : '#22293A',
+              border: 'none',
+              borderRadius: '12px',
+              color: '#FFFFFF',
+              fontSize: '15px',
+              fontWeight: 700,
+              letterSpacing: '0.3px',
+              cursor: isReleased ? 'pointer' : 'not-allowed',
+              boxShadow: isReleased ? '0 8px 22px rgba(37, 99, 235, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.25)' : 'none',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            UmmmHmmm raha nahi jata kya
+          </button>
+        </div>
+      </Html>
+    </group>
+  )
 }
 
 export default function App() {
-  const isWebGLSupported = useWebGLSupport()
-  const onSubmit = useCallback((credentials, finish) => handleDemoSubmit(credentials, finish), [])
+  const [formPositionX, setFormPositionX] = useState(4.28)
+  const [isFormAttached, setIsFormAttached] = useState(false)
+  const [isFormReleased, setIsFormReleased] = useState(false)
+  const [isBubbleVisible, setIsBubbleVisible] = useState(false)
+  const [bubblePositionX, setBubblePositionX] = useState(-1.2)
+  const [bubbleText, setBubbleText] = useState('')
+
+  const [viewportWidth, setViewportWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1280)
+
+  useEffect(() => {
+    const handleResize = () => setViewportWidth(window.innerWidth)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  const isMobile = viewportWidth < 768
+  const isSmallMobile = viewportWidth < 480
+
+  const cameraPos = isSmallMobile ? [0, 1.35, 9.8] : (isMobile ? [0, 1.4, 8.2] : [0, 1.45, 6.2])
+  const cameraFov = isSmallMobile ? 46 : (isMobile ? 42 : 38)
+  const formHtmlScale = isSmallMobile ? 0.135 : (isMobile ? 0.155 : 0.175)
+  const bubbleHtmlScale = isSmallMobile ? 0.135 : (isMobile ? 0.16 : 0.18)
+  const bubbleYPos = isSmallMobile ? 2.15 : 2.35
 
   return (
-    <main className="app-shell">
-      <a href="#email" className="skip-link">
-        Skip to sign-in form
-      </a>
-      <h1 className="visually-hidden">Sign in to your account</h1>
+    <main className="pure-black-stage">
+      <Canvas
+        shadows
+        camera={{ position: cameraPos, fov: cameraFov }}
+        style={{ width: '100vw', height: '100dvh', background: '#000000' }}
+      >
+        <ambientLight intensity={0.75} />
+        <directionalLight
+          position={[5, 7, 6]}
+          intensity={1.4}
+          castShadow
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
+          shadow-bias={-0.0005}
+        />
+        <directionalLight position={[-4, 4, -4]} intensity={0.5} color="#89B3F8" />
+        <pointLight position={[0, 4, 3]} intensity={0.6} color="#FFFFFF" />
 
-      {isWebGLSupported ? (
-        <ErrorBoundary fallback={<StaticLoginPage onSubmit={onSubmit} />}>
-          <Suspense fallback={<LoadingScreen />}>
-            <Scene onSubmit={onSubmit} />
-          </Suspense>
-        </ErrorBoundary>
-      ) : (
-        <StaticLoginPage onSubmit={onSubmit} />
-      )}
+        <Character
+          onFormPositionUpdate={(x, attached) => {
+            setFormPositionX(x)
+            setIsFormAttached(attached)
+          }}
+          onFormReleaseState={(released) => {
+            setIsFormReleased(released)
+          }}
+          onSpeechBubbleUpdate={(visible, x, text) => {
+            setIsBubbleVisible(visible)
+            setBubblePositionX(x)
+            setBubbleText(text)
+          }}
+        />
+
+        <SpeechBubble
+          visible={isBubbleVisible}
+          positionX={bubblePositionX}
+          text={bubbleText}
+          scale={bubbleHtmlScale}
+          yPos={bubbleYPos}
+        />
+
+        <LoginForm
+          positionX={formPositionX}
+          isAttached={isFormAttached}
+          isReleased={isFormReleased}
+          htmlScale={formHtmlScale}
+          isSmallMobile={isSmallMobile}
+        />
+
+        <ContactShadows
+          position={[0, 0, 0]}
+          opacity={0.75}
+          scale={16}
+          blur={1.8}
+          far={1.5}
+          resolution={1024}
+          color="#000000"
+        />
+
+        <mesh position={[0, -0.01, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+          <planeGeometry args={[40, 10]} />
+          <shadowMaterial opacity={0.3} />
+        </mesh>
+
+        <OrbitControls
+          enableZoom={false}
+          enablePan={false}
+          maxPolarAngle={Math.PI / 2 + 0.04}
+          minPolarAngle={Math.PI / 2 - 0.25}
+          target={[0, 1.1, 0]}
+        />
+      </Canvas>
     </main>
   )
 }
