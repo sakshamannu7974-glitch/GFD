@@ -919,24 +919,24 @@
    ========================================================================== */
 .msg-side-btn {
   position: fixed;
-  top: 80px;
+  top: 228px;
   right: 24px;
-  z-index: 9999;
+  z-index: 100;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 20px;
-  background: rgba(15, 12, 25, 0.88);
+  padding: 8px 18px;
+  background: rgba(15, 12, 25, 0.75);
   color: var(--ink, #f6f1ea);
-  border: 1px solid rgba(224, 148, 122, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 30px;
   font-family: var(--font-body);
-  font-size: 13.5px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
   letter-spacing: 0.03em;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 15px rgba(224, 148, 122, 0.25);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   cursor: pointer;
   transition: all 0.3s var(--ease-soft);
 }
