@@ -15,7 +15,7 @@
     top: auto !important;
     bottom: 20px !important;
     right: 14px !important;
-    z-index: 1000 !important;
+    z-index: 9999 !important;
     padding: 10px 16px !important;
     font-size: 12px !important;
     background: rgba(15, 12, 25, 0.94) !important;
@@ -28,7 +28,7 @@
     bottom: 20px !important;
     left: 14px !important;
     right: auto !important;
-    z-index: 1000 !important;
+    z-index: 9999 !important;
     padding: 10px 16px !important;
     font-size: 12px !important;
     background: rgba(15, 12, 25, 0.94) !important;
