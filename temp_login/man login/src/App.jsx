@@ -29,12 +29,12 @@ import './App.css'
  */
 
 // Preload existing model & animation assets
-useGLTF.preload('/models/Untitled.glb')
-useFBX.preload('/models/Breathing Idle.fbx')
-useFBX.preload('/models/Waving.fbx')
-useFBX.preload('/models/Pull Heavy Object.fbx')
-useFBX.preload('/models/Walking Backwards.fbx')
-useFBX.preload('/models/Dwarf Idle.fbx')
+useGLTF.preload('models/Untitled.glb')
+useFBX.preload('models/Breathing Idle.fbx')
+useFBX.preload('models/Waving.fbx')
+useFBX.preload('models/Pull Heavy Object.fbx')
+useFBX.preload('models/Walking Backwards.fbx')
+useFBX.preload('models/Dwarf Idle.fbx')
 
 // Helper: Normalizes FBX animation clips (`mixamorigHips.quaternion` and `mixamorigHips.position`)
 // to match Untitled.glb's root Armature coordinate space (+90° X Armature rotation).
@@ -75,12 +75,12 @@ function Character({ onFormPositionUpdate, onFormReleaseState, onSpeechBubbleUpd
   const warmupFramesRef = useRef(0)
 
   // 1. Load existing assets
-  const gltf = useGLTF('/models/Untitled.glb')
-  const idleFbx = useFBX('/models/Breathing Idle.fbx')
-  const waveFbx = useFBX('/models/Waving.fbx')
-  const pullFbx = useFBX('/models/Pull Heavy Object.fbx')
-  const walkBackFbx = useFBX('/models/Walking Backwards.fbx')
-  const dwarfIdleFbx = useFBX('/models/Dwarf Idle.fbx')
+  const gltf = useGLTF('models/Untitled.glb')
+  const idleFbx = useFBX('models/Breathing Idle.fbx')
+  const waveFbx = useFBX('models/Waving.fbx')
+  const pullFbx = useFBX('models/Pull Heavy Object.fbx')
+  const walkBackFbx = useFBX('models/Walking Backwards.fbx')
+  const dwarfIdleFbx = useFBX('models/Dwarf Idle.fbx')
 
   // 2. Prepare normalized animation clips array (`all full-body, authentic 100% model animations`)
   const clips = useMemo(() => {
