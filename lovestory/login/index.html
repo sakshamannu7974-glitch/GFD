@@ -37,6 +37,157 @@
         color: #ffffff;
         transform: translateY(-2px);
       }
+      .msg-side-btn {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        z-index: 9999;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 18px;
+        background: rgba(15, 12, 25, 0.85);
+        color: #f6f1ea;
+        border: 1px solid rgba(224, 148, 122, 0.4);
+        border-radius: 30px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      .msg-side-btn:hover {
+        background: rgba(224, 148, 122, 0.3);
+        border-color: #e0947a;
+        color: #ffffff;
+        transform: translateY(-2px);
+      }
+      .msg-btn-content {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .msg-pulse-badge {
+        position: absolute;
+        top: -4px;
+        right: -6px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #e0947a;
+        box-shadow: 0 0 8px #e0947a;
+        animation: pulseGlow 1.8s ease-in-out infinite;
+      }
+      @keyframes pulseGlow {
+        0%, 100% { transform: scale(1); opacity: 0.85; }
+        50% { transform: scale(1.4); opacity: 1; box-shadow: 0 0 12px #e0947a; }
+      }
+      .msg-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 21000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.35s ease;
+      }
+      .msg-modal.is-open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .msg-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(5, 4, 10, 0.85);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+      }
+      .msg-card {
+        position: relative;
+        width: min(480px, 92vw);
+        background: rgba(15, 12, 24, 0.96);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 24px;
+        box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85), 0 0 40px rgba(224, 148, 122, 0.2);
+        padding: 32px 28px;
+        z-index: 10;
+        color: #ffffff;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+      .msg-close-btn {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        font-size: 24px;
+        color: #aaaaaa;
+        background: none;
+        border: none;
+        cursor: pointer;
+      }
+      .msg-close-btn:hover { color: #ffffff; }
+      .msg-card-header { text-align: center; margin-bottom: 20px; }
+      .msg-header-icon { font-size: 36px; margin-bottom: 6px; }
+      .msg-title { font-size: 22px; font-weight: 700; margin: 0 0 6px 0; color: #ffffff; }
+      .msg-subtitle { font-size: 13px; color: #cccccc; margin: 0; }
+      .msg-field-group { margin-bottom: 16px; }
+      .msg-field-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #e2e8f0; }
+      .msg-field-group input, .msg-field-group textarea {
+        width: 100%;
+        padding: 12px 14px;
+        background: rgba(12, 14, 22, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 12px;
+        color: #ffffff;
+        font-size: 14px;
+        outline: none;
+        box-sizing: border-box;
+      }
+      .msg-field-group input:focus, .msg-field-group textarea:focus {
+        border-color: #e0947a;
+        box-shadow: 0 0 0 3px rgba(224, 148, 122, 0.2);
+      }
+      .msg-error-text { font-size: 12px; color: #ff6b6b; margin-top: 4px; display: block; }
+      .msg-submit-btn {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #e0947a 0%, #c46d52 100%);
+        border: none;
+        border-radius: 12px;
+        color: #ffffff;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 8px 22px rgba(224, 148, 122, 0.4);
+        transition: all 0.2s ease;
+      }
+      .msg-submit-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 28px rgba(224, 148, 122, 0.6);
+      }
+      .msg-status-banner {
+        margin-bottom: 14px;
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-size: 13px;
+        text-align: center;
+        display: none;
+      }
+      .msg-status-banner.is-success {
+        background: rgba(34, 197, 94, 0.2);
+        border: 1px solid rgba(34, 197, 94, 0.4);
+        color: #4ade80;
+      }
+      .msg-status-banner.is-error {
+        background: rgba(239, 68, 68, 0.2);
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        color: #f87171;
+      }
     </style>
   </head>
   <body>
@@ -47,6 +198,13 @@
       </svg>
       Back to Story
     </a>
+
     <div id="root"></div>
+
+    <!-- Floating Message Widget Integration -->
+    <script type="module">
+      import { initMessageWidget } from '../js/components/message-widget.js';
+      initMessageWidget();
+    </script>
   </body>
 </html>
