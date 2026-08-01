@@ -1,0 +1,35 @@
+.stage {
+  position: relative;
+  width: 100%;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: radial-gradient(ellipse at 50% 30%, #0b1220 0%, #000000 70%);
+  overflow: hidden;
+}
+
+.glow {
+  position: absolute;
+  top: 12%;
+  width: 480px;
+  height: 480px;
+  max-width: 90vw;
+  border-radius: 50%;
+  background: var(--color-accent-glow);
+  filter: blur(120px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.card {
+  position: relative;
+  padding: 32px 28px;
+  background: rgba(16, 19, 30, 0.96);
+  border: 1px solid rgba(138, 180, 248, 0.25);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    var(--shadow-card),
+    0 0 40px var(--color-accent-glow);
+}

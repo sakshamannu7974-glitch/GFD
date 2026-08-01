@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build & Dist
+dist/
+**/dist/
+build/
+
+# Environment & Secrets
+.env
+.env.local
+*.env
+
+# OS & Editor Files
+.DS_Store
+Thumbs.db
+__MACOSX/
+.vscode/
+.idea/

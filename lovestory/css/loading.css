@@ -1,0 +1,64 @@
+/* ==========================================================================
+   LOADING SEQUENCE
+   Dark screen -> floating particles -> three fading sentences -> reveal.
+   ========================================================================== */
+#loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-void);
+  transition: opacity 1.4s var(--ease-cinematic), visibility 1.4s;
+}
+
+#loading-screen.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loading-heartbeat {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #eadfc6;
+  box-shadow: 0 0 40px 12px rgba(234, 223, 198, 0.35);
+  animation: heartbeat 2.4s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(2.4); opacity: 1; }
+}
+
+.loading-text {
+  position: relative;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.1rem, 3vw, 1.7rem);
+  color: var(--ink-soft);
+  text-align: center;
+  padding: 0 24px;
+  opacity: 0;
+  max-width: 26ch;
+}
+
+.loading-text.is-active {
+  animation: loadingFade 2.6s var(--ease-soft) forwards;
+}
+
+@keyframes loadingFade {
+  0% { opacity: 0; transform: translateY(10px); filter: blur(6px); }
+  20% { opacity: 1; transform: translateY(0); filter: blur(0); }
+  80% { opacity: 1; }
+  100% { opacity: 0; filter: blur(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-heartbeat { animation: none; }
+  .loading-text.is-active { animation: none; opacity: 1; }
+}

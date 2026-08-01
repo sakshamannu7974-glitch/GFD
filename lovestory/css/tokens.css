@@ -1,0 +1,118 @@
+/* ==========================================================================
+   DESIGN TOKENS
+   Color psychology mapping (per emotion) + typography + motion scale.
+   Every chapter in story-data.js declares an `emotion` key that resolves
+   to one of the palettes below via [data-emotion="..."] on the chapter
+   section -- see chapter-observer.js for the live cross-fade logic.
+   ========================================================================== */
+
+@property --glow {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #7fb3d5;
+}
+
+:root {
+  /* Base canvas -- deep, cinematic, never pure flat black */
+  --bg-void: #05040a;
+  --bg-deep: #0a0812;
+  --ink: #f6f1ea;
+  --ink-soft: rgba(246, 241, 234, 0.72);
+  --ink-faint: rgba(246, 241, 234, 0.44);
+
+  --font-display: 'Fraunces', 'Georgia', serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-hand: 'Caveat', cursive;
+
+  --ease-cinematic: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-soft: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  --radius-md: 14px;
+  --radius-lg: 26px;
+
+  color-scheme: dark;
+}
+
+/* ---- Friendship: soft blue ---- */
+[data-emotion='friendship'] {
+  --accent: #7fb3d5;
+  --accent-soft: rgba(127, 179, 213, 0.28);
+  --glow: rgba(127, 179, 213, 0.45);
+  --particle: #a9cbe8;
+}
+
+/* ---- Hope: warm gold ---- */
+[data-emotion='hope'] {
+  --accent: #e8b84b;
+  --accent-soft: rgba(232, 184, 75, 0.24);
+  --glow: rgba(232, 184, 75, 0.5);
+  --particle: #f3d089;
+}
+
+/* ---- Love / Romantic: rose gold ---- */
+[data-emotion='love'] {
+  --accent: #e0947a;
+  --accent-soft: rgba(224, 148, 122, 0.26);
+  --glow: rgba(224, 148, 122, 0.5);
+  --particle: #f0b7a4;
+}
+
+/* ---- First Meeting: dreamy pink-white, the climax palette ---- */
+[data-emotion='firstmeeting'] {
+  --accent: #f2c9d6;
+  --accent-soft: rgba(242, 201, 214, 0.3);
+  --glow: rgba(242, 201, 214, 0.6);
+  --particle: #ffffff;
+}
+
+/* ---- Travel: sky blue ---- */
+[data-emotion='travel'] {
+  --accent: #6fa8c9;
+  --accent-soft: rgba(111, 168, 201, 0.24);
+  --glow: rgba(111, 168, 201, 0.42);
+  --particle: #9fc9e3;
+}
+
+/* ---- Temple: warm saffron ---- */
+[data-emotion='temple'] {
+  --accent: #e2914f;
+  --accent-soft: rgba(226, 145, 79, 0.26);
+  --glow: rgba(226, 145, 79, 0.48);
+  --particle: #f4b877;
+}
+
+/* ---- Joy: golden light ---- */
+[data-emotion='joy'] {
+  --accent: #edc75f;
+  --accent-soft: rgba(237, 199, 95, 0.26);
+  --glow: rgba(237, 199, 95, 0.5);
+  --particle: #f7e0a0;
+}
+
+/* ---- Sad / Loneliness: cold, muted blue-grey ---- */
+[data-emotion='sad'] {
+  --accent: #5b6b7a;
+  --accent-soft: rgba(91, 107, 122, 0.22);
+  --glow: rgba(91, 107, 122, 0.3);
+  --particle: #8797a4;
+}
+
+/* ---- Future: white + gold ---- */
+[data-emotion='future'] {
+  --accent: #eadfc6;
+  --accent-soft: rgba(234, 223, 198, 0.24);
+  --glow: rgba(234, 223, 198, 0.5);
+  --particle: #ffffff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-scale: 0;
+  }
+}

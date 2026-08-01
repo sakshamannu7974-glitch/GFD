@@ -1,0 +1,150 @@
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@300;400;500;600&family=Caveat:wght@500;600&display=swap');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  scroll-behavior: auto; /* Lenis takes over smooth scrolling in JS */
+  background: var(--bg-void);
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-void);
+  color: var(--ink);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+img, video { max-width: 100%; display: block; }
+
+a { color: inherit; text-decoration: none; }
+
+button { font-family: inherit; border: none; background: none; cursor: pointer; color: inherit; }
+
+::selection { background: var(--accent, #e0947a); color: #05040a; }
+
+:focus-visible {
+  outline: 2px solid var(--accent, #e8b84b);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* ---- Global canvas layers ---- */
+#ambient-glow {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 18%, var(--glow, transparent) 0%, transparent 62%);
+  transition: background 1.6s var(--ease-soft);
+}
+
+#particle-container {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+  transition: opacity 1.2s var(--ease-soft);
+}
+
+.particle-dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--size, 5px);
+  height: var(--size, 5px);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, var(--particle, #f0b7a4) 40%, transparent 100%);
+  border-radius: 50%;
+  box-shadow:
+    0 0 10px 2px var(--glow, rgba(240, 183, 164, 0.6)),
+    0 0 20px 4px var(--glow, rgba(240, 183, 164, 0.25));
+  pointer-events: none;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  transition: background 1.2s var(--ease-soft), box-shadow 1.2s var(--ease-soft);
+}
+
+
+#timeline-progress {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 3px;
+  z-index: 50;
+  background: transparent;
+}
+#timeline-progress::after {
+  content: '';
+  display: block;
+  height: 100%;
+  width: var(--scroll-progress, 0%);
+  background: linear-gradient(90deg, var(--accent, #e8b84b), transparent);
+  transition: width 0.1s linear;
+}
+
+main {
+  position: relative;
+  z-index: 2;
+}
+
+/* ---- Typography scale ---- */
+h1, h2, h3 { font-family: var(--font-display); font-weight: 500; line-height: 1.05; letter-spacing: -0.01em; }
+
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent, var(--ink-faint));
+}
+
+.chapter-title {
+  font-size: clamp(2.2rem, 6vw, 4.4rem);
+  margin: 0.3em 0 0.4em;
+}
+
+.chapter-location {
+  font-size: 14px;
+  color: var(--ink-faint);
+  font-style: italic;
+}
+
+.story-text {
+  font-size: clamp(1.02rem, 1.6vw, 1.2rem);
+  line-height: 1.75;
+  color: var(--ink-soft);
+  max-width: 62ch;
+}
+
+.story-text + .story-text { margin-top: 1.3em; }
+
+.word-reveal {
+  display: inline-block;
+  opacity: 1;
+  filter: none;
+}
+
+.milestone-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--ink);
+  background: var(--accent-soft, rgba(255,255,255,0.06));
+  border: 1px solid var(--accent-soft, rgba(255,255,255,0.1));
+  border-radius: 999px;
+}

@@ -1,0 +1,18 @@
+.overlay {
+  pointer-events: none;
+}
+
+.card {
+  width: 340px;
+  padding: 32px 28px;
+  background: rgba(16, 19, 30, 0.96);
+  border-radius: var(--radius-lg);
+  opacity: 0.88;
+  transition: opacity var(--duration-slow) ease;
+  pointer-events: none;
+}
+
+.card[data-released='true'] {
+  opacity: 1;
+  pointer-events: auto;
+}

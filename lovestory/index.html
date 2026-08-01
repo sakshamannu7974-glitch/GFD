@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#05040a" />
+  <meta name="color-scheme" content="dark" />
+  <title>Hamari Kahani — Our Story</title>
+  <meta name="description" content="A cinematic memory of us." />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Hamari Kahani — Our Story" />
+  <meta property="og:description" content="Ek gaming platform se shuru hoke, do zindagiyon tak — hamari poori kahani." />
+  <meta property="og:image" content="assets/images/hero/collage-01.png" />
+
+  <!-- Twitter card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Hamari Kahani — Our Story" />
+  <meta name="twitter:description" content="Ek gaming platform se shuru hoke, do zindagiyon tak." />
+  <meta name="twitter:image" content="assets/images/hero/collage-01.png" />
+
+  <!-- This is a private, personal gift site -- not meant to be indexed. -->
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/loading.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+
+  <!-- Preload the hero collage -- the very first thing a visitor sees. -->
+  <link rel="preload" as="image" href="assets/images/hero/collage-01.png" fetchpriority="high" />
+  <!-- Gatekeeper: Redirect to Login if not authenticated -->
+  <script>
+    if (sessionStorage.getItem('authenticated') !== 'true') {
+      window.location.replace('./login/');
+    }
+  </script>
+</head>
+<body data-emotion="friendship">
+  <a href="#story-root" class="skip-link">Skip to story</a>
+
+  <div id="ambient-glow"></div>
+  <div id="particle-container"></div>
+  <div id="timeline-progress"></div>
+  <button onclick="sessionStorage.removeItem('authenticated'); window.location.reload();" class="login-btn-nav" title="Logout">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+    </svg>
+    <span>Lock / Logout</span>
+  </button>
+
+  <main id="story-root" aria-live="polite"></main>
+
+  <!-- Third-party libraries (CDN). If offline, chapter-observer.js and
+       smooth-scroll.js both detect their absence and fall back gracefully. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lenis/1.1.14/lenis.min.js"></script>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
